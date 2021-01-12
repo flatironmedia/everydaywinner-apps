@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Shell\ConsoleShell;
-use App\Shell\EDWWinnerJsonExportShell as ShellEDWWinnerJsonExportShell;
+use App\Shell\EDWWinnerJsonExportShell;
 use Cake\Controller\Controller;
 use Cake\Event\Event;
 // use Cake\Datasource\ConnectionManager;
@@ -11,31 +11,58 @@ use Cake\Routing\Router;
 // use DateTime;
 use Cake\ORM\TableRegistry;
 use Cake\Core\Configure;
+use Cake\Datasource\ConnectionManager;
 use Cake\Http\Client;
 use Cake\Log\Log;
+use SendGrid;
 
 class ConfirmController extends AppController {
     
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadModel('Winners');
+        // $this->loadModel('SiteConfigs');
+    }
 	public function beforeFilter(Event $event) {
         parent::beforeFilter($event);
         $this->baseUrl=Router::url('/',true);
     }
     public $uses = array('Winner','Standing','DefaultConfig','Notes', 'Site', 'SiteConfig', 'PrizeSchedule');
-    public $components = array('EDWThings', 'Sites'); //"EchoSign",
+    public $components = array('EDWThings', 'Sites'); // ,"EchoSign"
 
 	public function index(){
 		return $this->redirect(array('action'=>'linkexpired'));
     }
+
+
     public function testItemClass(){
+        // $this->loadModel('Sites');
         // die("haha shit...");
         $response = [
             'status' => "success",
             "data" => []
         ];
-        debug($this->response->type('json'));
-        debug($this->response->body(json_encode($response)));
+        // $this->Sendgrid
+        // $test = New SendGrid();
+        // debug($test);
+        // $conn = ConnectionManager::get('default');
+
+        // $winner = $conn->execute('SELECT * FROM funnel_notes;')->fetchAll('assoc');
+        $test = $this->Winners->findByToken('588768d8787df1485269208')->first();
+        // $sites = TableRegistry::getTableLocator()->get('Sites');
+        // $test = $sites->find('all');
+        debug($test);
         die();
-        $winnerCircleShell = new ShellEDWWinnerJsonExportShell();
+        foreach ($test as $winner){
+
+            debug($winner);
+        }
+        die();
+        debug($this->response->withType('json'));
+        debug($this->response->withStringBody(json_encode($response)));
+        die();
+        $winnerCircleShell = new EDWWinnerJsonExportShell();
         $winnerCircleShell->checkWinnerFeedExists();
         debug($winnerCircleShell);
         die();
@@ -45,7 +72,7 @@ class ConfirmController extends AppController {
     public function congratulations($token=null){
         // $this->layout='ewlayout';
         $this->viewBuilder()->getLayout('ewlayout');
-        $requestSiteCode = !empty($this->request->query('site')) ? $this->request->query('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
 
         if ($token == null) {
             return $this->redirect(array('action' => 'linkexpired'));
@@ -140,7 +167,7 @@ class ConfirmController extends AppController {
 	}
 
 	public function winnerData(){
-        // $this->layout = "ajax";
+
         $this->viewBuilder()->setLayout("ajax");
 		$this->autoRender = false;
 
@@ -176,8 +203,8 @@ class ConfirmController extends AppController {
 	}
 
 	public function agreements($token=null){
-        $requestSiteCode = !empty($this->request->query('site')) ? $this->request->query('site') : 'EDW';
-        // $this->layout='ewlayout';
+        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
+
         $this->viewBuilder()->setLayout('ewlayout');
         $encodedEsignWidgetUrl = empty($this->request->params['named']["widgeturl"])
             ? explode("/", base64_encode($this->EchoSign->getWinnerWidget([], $requestSiteCode)->urlWidgetCreationResult->url))[0]
@@ -294,7 +321,7 @@ class ConfirmController extends AppController {
     }
 
     public function shareGoodNews($token=null){
-        $requestSiteCode = !empty($this->request->query('site')) ? $this->request->query('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
         // $this->layout='ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
     	if($token == null){ return $this->redirect(array('action'=>'linkexpired')); }
@@ -329,7 +356,7 @@ class ConfirmController extends AppController {
 	{
         // $this->layout = 'ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
-        $requestSiteCode = !empty($this->request->query('site')) ? $this->request->query('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
 
         if($token == null){return $this->redirect(array('action'=>'linkexpired'));}
         $decodedToken = base64_decode($token);
@@ -429,7 +456,7 @@ class ConfirmController extends AppController {
             'data' => []
         ];
 
-        $winnerCircleShell = new ShellEDWWinnerJsonExportShell();
+        $winnerCircleShell = new EDWWinnerJsonExportShell();
         if ($winnerCircleShell->checkWinnerFeedExists()) {
             if ($winnerCircleShell->checkWinnerFeedWasCreatedToday()) {
                 $response['data']['result'] = false;
@@ -441,8 +468,8 @@ class ConfirmController extends AppController {
             $response['data']['result'] = true;
         }
 
-        $this->response->type('json');
-        $this->response->body(json_encode($response));
+        $this->response->withType('json');
+        $this->response->withStringBody(json_encode($response));
         return $this->response;
     }
 
@@ -451,7 +478,7 @@ class ConfirmController extends AppController {
         Log::write('debug', "Site code =".$siteCode);
         $this->autoRender = false;
         try {
-            $winneCirclerShell = new ShellEDWWinnerJsonExportShell();
+            $winneCirclerShell = new EDWWinnerJsonExportShell();
 
             if ($siteCode == 'EDW') {
                 $pastWinner = $winneCirclerShell->saveYesterdayWinner($siteCode);
@@ -562,8 +589,8 @@ class ConfirmController extends AppController {
             }
         }
 
-        $this->response->type('json');
-        $this->response->body(json_encode($response));
+        $this->response->withType('json');
+        $this->response->withStringBody(json_encode($response));
         return $this->response;
     }
 
@@ -582,7 +609,7 @@ class ConfirmController extends AppController {
         ];
 
         if (Configure::read('DEVELOPMENT_MODE')) {
-            $options['recipient'][] = ['jpurena@intellisys.com.do'];
+            $options['recipient'][] = ['jalvarez@intellisys.com.do'];
         } else {
             $options['recipient'][] = ['support@flatironmedia.com', 'editorial@flatironmedia.com'];
         }

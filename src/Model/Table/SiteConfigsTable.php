@@ -10,7 +10,7 @@ class SiteConfigsTable extends Table {
     public $actsAs = array('FlatIronDataBase');
     public function getConfigBySiteCode($configName, $siteCode)
     {
-        $sitesModel = TableRegistry::get('Site');
+        $sitesModel = TableRegistry::init('Sites');
         $site = $sitesModel->find('first', array(
                 'conditions' => array('code' => $siteCode)
             )

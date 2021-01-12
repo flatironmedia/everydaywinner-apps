@@ -1,6 +1,6 @@
 <?php
 
-    namespace EchoSign;
+namespace EchoSign;
 
 use EchoSign\Info\AccountCreationInfo,
         EchoSign\Info\DocumentCreationInfo,

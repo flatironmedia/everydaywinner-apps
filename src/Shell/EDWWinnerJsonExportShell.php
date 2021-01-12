@@ -5,7 +5,6 @@ use Cake\Console\Shell;
 use Cake\Core\Configure;
 // App::import('Core', 'Controller'); //same as below
 // App::import('Component', 'PickWinner'); //tell how to implemente this and where it comes from
-// App::uses('AppModel', 'Model');
 use Cake\Controller\Controller;
 use Cake\Log\Log;
 use Cake\ORM\Table;

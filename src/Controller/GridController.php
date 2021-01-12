@@ -1,8 +1,18 @@
 <?php
 namespace App\Controller;
 
+use Cake\Core\Configure;
+use App\Controller\Component\SendGridComponent;
+
+
 class GridController extends AppController{
 
+	public function testGrid(){//this is temporary
+		$this->autoRender = false;
+		$this->sendGrid = new SendGridComponent("test");
+		debug($this->sendGrid);
+		die();
+	}
 	public function subscribeUser(){
 		// $this->layout = 'ajax';
 		$this->autoRender = false;

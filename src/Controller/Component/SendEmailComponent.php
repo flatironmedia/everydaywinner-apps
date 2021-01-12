@@ -24,20 +24,21 @@ class SendEmailComponent extends Component {
                 }
             }
         }
-        $Email->template($template, 'default')
-            ->emailFormat('html')
-            ->viewVars($viewVars)
-            ->to($recipient)
-            ->cc($ccRecipient)
-            ->from(array('no-reply@flatironmedia.com' => 'Everyday Winner'))
-            ->replyTo($emailSender)
-            ->subject($subject)
+
+        $Email->viewBuilder()->setTemplate($template, 'default');
+        $Email->setEmailFormat('html')
+            ->setViewVars($viewVars)
+            ->setTo($recipient)
+            ->setCc($ccRecipient)
+            ->setFrom(array('no-reply@flatironmedia.com' => 'Everyday Winner'))
+            ->setReplyTo($emailSender)
+            ->setSubject($subject)
             ->send();
     }
 
     private function getEmailHelper(){
-        $DefaultConfigsTable = TableRegistry::get('DefaultConfig');
-        $siteConfigsTable = TableRegistry::get('SiteConfig');
+        $DefaultConfigsTable = TableRegistry::getTableLocator()->get('DefaultConfig');
+        $siteConfigsTable = TableRegistry::getTableLocator()->get('SiteConfig');
 
         $host = $siteConfigsTable->getConfigBySiteCode('smtp_host', 'EDW');
         $sender = $siteConfigsTable->getConfigBySiteCode('smtp_email', 'EDW');

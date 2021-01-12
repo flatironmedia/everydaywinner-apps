@@ -1,0 +1,61 @@
+
+            <feed>
+            <mailing>
+                
+            <variables>
+                <variable>
+                    <key>yesterday_winner_name</key>
+                    <value>Adam G.</value>
+                </variable>
+                <variable>
+                    <key>yesterday_winner_city</key>
+                    <value>Nash, TX</value>
+                </variable>
+            </variables>
+        
+            <blocks>
+                <block name="unclaimed_prizes">
+                    
+                <items>
+                    <item>
+                    <variables>
+                        <variable>
+                            <key>date_won</key>
+                            <value>06/23/2019</value>
+                        </variable>
+                        <variable>
+                            <key>winner_name</key>
+                            <value>Crystal I.</value>
+                        </variable>
+                        <variable>
+                            <key>winner_city</key>
+                            <value>Corinth, MS</value>
+                        </variable>
+                    </variables>
+                    </item>
+                </items>
+            
+                <items>
+                    <item>
+                    <variables>
+                        <variable>
+                            <key>date_won</key>
+                            <value>10/04/2018</value>
+                        </variable>
+                        <variable>
+                            <key>winner_name</key>
+                            <value>Barbara W.</value>
+                        </variable>
+                        <variable>
+                            <key>winner_city</key>
+                            <value>Hot Springs National Park, AR</value>
+                        </variable>
+                    </variables>
+                    </item>
+                </items>
+            
+                </block>
+            </blocks>
+            </mailing>
+            </feed>
+        

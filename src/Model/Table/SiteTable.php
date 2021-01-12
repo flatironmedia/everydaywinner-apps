@@ -3,16 +3,9 @@ namespace App\Model\Table;
 
 use Cake\ORM\Table;
 
-class SiteTable extends Table
-{
-    public static function defaultConnectionName() {
-        return 'EDWmySQL';
-    }
+class SiteTable extends Table {
+    var $actsAs = array('Containable');
 
-    public function initialize(array $config)
-    {
-        $this->hasMany('Standings');
-    }
-
+    public $hasMany = 'Standing';
 }
 ?>

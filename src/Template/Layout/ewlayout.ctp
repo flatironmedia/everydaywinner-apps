@@ -7,12 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>EverydayWinner</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700,800" rel="stylesheet">
-    <?php 
-        // debug($this->request->webroot.'files/ew/css/bootstrap.min.css');
-        // die();
-    ?>
-    <link rel="stylesheet" type="text/css" href="<?php echo $this->request->webroot;?>files/ew/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $this->request->webroot;?>files/ew/css/style.css?v=1.0.0" />
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->request->getAttribute("webroot");?>files/ew/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->request->getAttribute("webroot");?>files/ew/css/style.css?v=1.0.0" />
     </head>
     <!-- end of header -->
     <body>
@@ -61,12 +57,12 @@
         </div>
             <!-- WRAPPER ENDS -->
 
-        <script type="text/javascript" src="<?php echo $this->request->webroot;?>files/ew/js/canvas-to-blob.min.js"></script><!--Multi browser support for toBlob function-->
-        <script type="text/javascript" src="<?php echo $this->request->webroot;?>files/ew/js/jquery-1.11.3.min.js"></script>
-        <script type="text/javascript" src="<?php echo $this->request->webroot;?>files/ew/js/css3-mediaqueries.js"></script>
-        <script type="text/javascript" src="<?php echo $this->request->webroot;?>files/ew/js/modernizr.custom.49493.js"></script>
-        <script type="text/javascript" src="<?php echo $this->request->webroot;?>files/ew/js/custom-file-input.js"></script>
-        <script src="<?php echo $this->request->webroot;?>files/ew/js/jquery.valideater-0.2.2.js"></script>
+        <script type="text/javascript" src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/canvas-to-blob.min.js"></script><!--Multi browser support for toBlob function-->
+        <script type="text/javascript" src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/css3-mediaqueries.js"></script>
+        <script type="text/javascript" src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/modernizr.custom.49493.js"></script>
+        <script type="text/javascript" src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/custom-file-input.js"></script>
+        <script src="<?php echo $this->request->getAttribute("webroot");?>files/ew/js/jquery.valideater-0.2.2.js"></script>
 
         <?php echo $this->Html->script('cropper.min.js?v=1.0.0'); ?>
         <?php echo $this->Html->script('everyday_winners.js?v=1.1.1'); ?>

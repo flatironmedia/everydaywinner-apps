@@ -19,6 +19,24 @@ return [
      */
     'debug' => filter_var(env('DEBUG', false), FILTER_VALIDATE_BOOLEAN),
     'DEVELOPMENT_MODE' => true,
+    'Adobe.redirect_uri' => 'https://west.everydaywinner.com/feature/EDW/app_new',
+	'Adobe.client_id' => 'CBJCHBCAABAAHlcs62iDUFXppT-fM6dNmbr8v8j910Kl',
+	'Adobe.client_secret' => 'tUu5n-2bek_BK2ddl0ZURnKWj3IrLUbN',
+	'Adobe.refresh_token' => '3AAABLblqZhBlsv0sr7gbKJntczj4fzukom-NaLZeCObZkhO3PLU8wPsrDg9jqIH1zcCLk_tHHRA*' ,
+    /**
+     * A random string used in security hashing methods.
+     */
+	'Security.salt' => 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mo',
+
+    /**
+     * A random numeric string (digits only) used to encrypt/decrypt strings.
+     */
+    'Security.cipherSeed' => '02083989595149438257504183302666',
+
+    /**
+    * The SendGrid API Key.
+    */
+    'SendGrid.ApiKey'=> '',
     /*
      * Configure basic information about the application.
      *
@@ -263,19 +281,19 @@ return [
             'className' => Connection::class,
             'driver' => Mysql::class,
             'persistent' => false,
-            'host' => 'localhost',
+            'host' => '',
             /*
              * CakePHP will use the default DB port based on the driver selected
              * MySQL on MAMP uses port 8889, MAMP users will want to uncomment
              * the following line and set the port accordingly
              */
-            //'port' => 'non_standard_port_number',
+            // 'port' => '',
             /*
              * It is recommended to set these options through your environment or app_local.php
              */
-            //'username' => 'my_app',
-            //'password' => 'secret',
-            //'database' => 'my_app',
+            'username' => '',
+            'password' => '',
+            'database' => '',
             /*
              * You do not need to set this flag to use full utf-8 encoding (internal default since CakePHP 3.6).
              */

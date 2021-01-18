@@ -3,6 +3,7 @@
 namespace App\Controller\Component;
 
 // App::uses('Component', 'Controller');
+
 use Cake\Routing\Router;
 use Cake\ORM\TableRegistry;
 use Cake\Filesystem\Folder;
@@ -12,8 +13,9 @@ use Cake\Core\Configure;
 use Exception;
 use Cake\Controller\Component;
 use Cake\Controller\Controller;
+// use Cake\Controller\Controller;
 
-App::build(array('Vendor' => array(APP . 'Vendor' . DS . 'EchoSign')));
+// App::build(array('Vendor' => array(APP . 'Vendor' . DS . 'EchoSign')));
 
 use EchoSign\API,
     EchoSign\Info\FileInfo,
@@ -36,13 +38,12 @@ class EchoSignComponent extends Component {
     private $baseUrl = null;
     private $DefaultConfig = null;
 
-    public $components = array('Sites');
+    public $components = ['Site'];
 
-    public function initialize(Controller $controller)
-    {
+    public function initialize($controller) {
         parent::initialize($controller);
-        $this->DefaultConfig = TableRegistry::init("DefaultConfig");
-        $this->SiteConfig = TableRegistry::init("SiteConfig");
+        $this->DefaultConfig = TableRegistry::getTableLocator()->get("DefaultConfigs");
+        $this->SiteConfig = TableRegistry::getTableLocator()->get("SiteConfigs");
         $this->apiKey = $this->SiteConfig->getConfigBySiteCode('echo_sign_api_key', 'EDW');
         $this->baseUrl = Router::url('/', true);
     }
@@ -204,7 +205,7 @@ class EchoSignComponent extends Component {
 
     public function getWinnerWidget($options, $siteCode = 'EDW'){
         $documentKey = null;
-        $fileFullPath = $this->Sites->getSiteConfig('release_document_url', $siteCode);
+        $fileFullPath = $this->Site->getSiteConfig('release_document_url', $siteCode);
         $fileFullPath = isset($options['filePath']) ? $options['filePath'] : $fileFullPath;
         $file = \EchoSign\Info\FileInfo::createFromFile($fileFullPath);
         if (isset($options["mergeInfo"])) {

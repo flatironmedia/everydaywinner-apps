@@ -7,22 +7,26 @@ use Cake\ORM\TableRegistry;
 
 class SiteConfigsTable extends Table {
 
-    public $actsAs = array('FlatIronDataBase');
+    public function initialize(array $config)
+    {
+        $this->addBehavior('FlatIronDataBase');
+    }
+
     public function getConfigBySiteCode($configName, $siteCode)
     {
-        $sitesModel = TableRegistry::init('Sites');
-        $site = $sitesModel->find('first', array(
-                'conditions' => array('code' => $siteCode)
-            )
-        );
+        $sitesModel = TableRegistry::getTableLocator()->get('Sites');
+        $site = $sitesModel->find('all', [
+                'conditions' => ['code' => $siteCode]
+            ]
+        )->first();
 
-        $config = $this->find('first', array(
-            'conditions' => array(
+        $config = $this->find('all', [
+            'conditions' => [
                 'config_name' => $configName,
-                'site_id' => $site['Site']['id']
-            )
-        ));
+                'site_id' => $site['id']
+            ]
+        ])->first();
 
-        return $config['SiteConfig']['config_value'];
+        return $config['config_value'];
     }
 }

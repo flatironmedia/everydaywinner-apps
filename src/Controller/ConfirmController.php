@@ -22,14 +22,16 @@ class ConfirmController extends AppController {
     {
         parent::initialize();
         $this->loadModel('Winners');
-        // $this->loadModel('SiteConfigs');
+        $this->loadModel('Standings');
+        $this->loadModel('SiteConfigs');
+        $this->loadModel('Sites');
     }
 	public function beforeFilter(Event $event) {
         parent::beforeFilter($event);
         $this->baseUrl=Router::url('/',true);
     }
-    public $uses = array('Winner','Standing','DefaultConfig','Notes', 'Site', 'SiteConfig', 'PrizeSchedule');
-    public $components = array('EDWThings', 'Sites'); // ,"EchoSign"
+    public $uses = ['Winner','Standing','DefaultConfig','Notes', 'Site', 'SiteConfig', 'PrizeSchedule'];
+    public $components = ['EDWThings',"EchoSign", 'Site'];
 
 	public function index(){
 		return $this->redirect(array('action'=>'linkexpired'));
@@ -49,18 +51,47 @@ class ConfirmController extends AppController {
         // $conn = ConnectionManager::get('default');
 
         // $winner = $conn->execute('SELECT * FROM funnel_notes;')->fetchAll('assoc');
-        $test = $this->Winners->findByToken('588768d8787df1485269208')->first();
+        // $test = $this->Winner->findByToken('588768d8787df1485269208')->first();
         // $sites = TableRegistry::getTableLocator()->get('Sites');
         // $test = $sites->find('all');
-        debug($test);
-        die();
-        foreach ($test as $winner){
+        // $test = $this->SiteConfigs->find('all');
+        // $winners = TableRegistry::getTableLocator()->get('winners');
+        // $test = $test0->find('all');
+        // $winner = $winners->findByToken('588768d8787df1485269208')->first();
+        // debug($winners);
+        // debug($test);
+        // die();
+        // $test = $winners->find('All', ['contain' => ['Standings']])->where(['token'=>'588768d8787df1485269208'])->all();
 
-            debug($winner);
-        }
-        die();
-        debug($this->response->withType('json'));
-        debug($this->response->withStringBody(json_encode($response)));
+        // $winnerSelected = $this->Winners->find('byToken', ['token' => '588768d8787df1485269208']);
+        // debug($this);
+        // debug($winnerSelected->first());
+        // $winner = $winnerSelected->first();
+        // debug($winner);
+        // die();
+        // debug($winner['Standings']['site_id']);
+        // $site = $this->Sites->find('all')->where(['id' => $winner['Standings']['site_id']])->first();
+        // $site1 = $this->Sites->findById(1)->all();
+        // $site = $this->Sites->find('all', array(
+        //     'conditions' => array('id' => $winner['Standings']['site_id'])
+        //     ))->first();
+        // debug($site['code']);
+        // debug($site1);
+        // debug($this);
+        // die();
+        // debug($this->session->read('Winner.Address'));
+        // debug($this->Standings->find('all')->all());
+        // die();
+        // foreach ($test as $winner){
+
+        //     debug($winner);
+        // }
+        // die();
+        // debug($this->response->withType('json'));
+        // debug($this->response->withStringBody(json_encode($response)));
+        // die();
+        // $this->Winners->id = "holla mundo";
+        debug($this->SiteConfigs->find('all')->first());
         die();
         $winnerCircleShell = new EDWWinnerJsonExportShell();
         $winnerCircleShell->checkWinnerFeedExists();
@@ -69,26 +100,27 @@ class ConfirmController extends AppController {
 
     }
 
-    public function congratulations($token=null){
+    public function congratulations($token = null){
         // $this->layout='ewlayout';
         $this->viewBuilder()->getLayout('ewlayout');
-        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
 
         if ($token == null) {
             return $this->redirect(array('action' => 'linkexpired'));
         }
         $token = base64_decode($token);
 
-        $winner = $this->Winner->findByToken($token);
+        // $winner = $this->Winners->findByToken($token);
+        $winner = $this->Winners->find('byToken', ['token' => $token])->first();
         if (!empty($winner)) {
-            $site = $this->Site->find('first', array(
-            'conditions' => array('id' => $winner['Standing']['site_id'])
-            ));
-            $siteCode = $site['Site']['code'];
+            $site = $this->Sites->find('all', array(
+            'conditions' => array('id' => $winner['Standings']['site_id'])
+            ))->first();
+            $siteCode = $site['code'];
         }
 
         if($this->request->is('get')){
-            if(!isset($winner['Winner'])) return $this->redirect(array('action'=>'linkexpired'));
+            if(!isset($winner)) return $this->redirect(array('action'=>'linkexpired'));
 
             $this->Winner->id = $winner['Winner']['id'];
             $this->Standing->id = $winner['Standing']['id'];
@@ -203,7 +235,7 @@ class ConfirmController extends AppController {
 	}
 
 	public function agreements($token=null){
-        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
 
         $this->viewBuilder()->setLayout('ewlayout');
         $encodedEsignWidgetUrl = empty($this->request->params['named']["widgeturl"])
@@ -244,7 +276,7 @@ class ConfirmController extends AppController {
         $this->viewBuilder()->setLayout('ajax');
 
         $winnerId = base64_decode($this->request->query['winnerId']);
-        $winner = $this->Winner->findById($winnerId);
+        $winner = $this->Winners->findById($winnerId);
 
         switch ($this->request->query['eventType']) {
             case 'EMAIL_VIEWED':
@@ -321,7 +353,7 @@ class ConfirmController extends AppController {
     }
 
     public function shareGoodNews($token=null){
-        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
         // $this->layout='ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
     	if($token == null){ return $this->redirect(array('action'=>'linkexpired')); }
@@ -356,7 +388,7 @@ class ConfirmController extends AppController {
 	{
         // $this->layout = 'ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
-        $requestSiteCode = !empty($this->request->getQueryParams('site')) ? $this->request->getQueryParams('site') : 'EDW';
+        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
 
         if($token == null){return $this->redirect(array('action'=>'linkexpired'));}
         $decodedToken = base64_decode($token);

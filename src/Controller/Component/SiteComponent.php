@@ -4,8 +4,8 @@ namespace App\Controller\Component;
 use Cake\Controller\Component;
 
 /* for sites configuration that are not saved on the database */
-class SitesComponent extends Component {
-    private $sites = [
+class SiteComponent extends Component {
+    private $site = [
         'EDW' => [
             'name' => 'Everyday Winner',
             'winnerTitle' => "EverydayWinner's winner",
@@ -28,6 +28,6 @@ class SitesComponent extends Component {
 
     public function getSiteConfig($configName, $siteCode)
     {
-        return $this->sites[$siteCode][$configName];
+        return $this->site[$siteCode][$configName];
     }
 }

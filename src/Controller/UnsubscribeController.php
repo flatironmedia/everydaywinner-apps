@@ -4,7 +4,6 @@ namespace App\Controller;
 class UnsubscribeController extends AppController {
 
 	public function index(){
-		// $this->layout='ewlayout';
 		$this->viewBuilder()->setLayout('ewlayout');
 		if($this->request->is('post')){
 			$email = htmlentities($this->request->data['email_winner']);

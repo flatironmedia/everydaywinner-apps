@@ -27,8 +27,8 @@ class FeatureController extends AppController {
 
         Log::info($log, ['scope'=>['featureLog']]);
 
-        $redirect=str_replace("feature/EDW/app/", "/", $this->request->url);
-        $redirect=str_replace("feature/edw/app/", "/", $redirect);
+        $redirect=str_replace("feature/EDW/webroot/", "/", $this->request->url);
+        $redirect=str_replace("feature/edw/webroot/", "/", $redirect);
 
         return $this->redirect($redirect);
     }

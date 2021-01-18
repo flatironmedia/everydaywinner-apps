@@ -7,12 +7,12 @@ use Cake\ORM\Table;
 class NotesTable extends Table {
     public function getLastNote($winnerID)
     {
-        $latestNote=$this->find('first',array(
-            'conditions'=>array(
+        $latestNote=$this->find('all',[
+            'conditions'=>[
                 'winner_id'=>$winnerID
-            ),
-            'order'=>array('id'=>'DESC')
-        ));
+            ],
+            'order'=>['id'=>'DESC']
+        ])->first();
         
         $result = isset($latestNote['Notes']['note'])?date('m/d:',strtotime($latestNote['Notes']['date_time']))." ".$latestNote['Notes']['note']:"";
         

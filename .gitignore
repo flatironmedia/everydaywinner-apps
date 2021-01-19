@@ -5,7 +5,19 @@
 /logs/*
 /tmp/*
 /vendor/*
+/webroot/files/wg_winnerphoto/*
+/webroot/files/winnerphoto/*
+/webroot/files/wg_winnercircle/featuredwinner.json
+/webroot/files/wg_winnercircle/lastsundaywinner.json
+/webroot/files/wg_winnercircle/winnercircledata.json
 
+/webroot/files/winnnercircle/featuredwinner.json
+/webroot/files/winnercircle/lastsundaywinner.json
+/webroot/files/winnercircle/winnercircledata.json
+/webroot/files/winnercircle/yesterdaywinner.json
+/webroot/files/winnercircle/winner-feed-old.xml
+/webroot/files/winnercircle/winner-feed.xml
+/webroot/files/winnercircle/yesterdaywinner.txt
 # OS generated files #
 ######################
 .DS_Store

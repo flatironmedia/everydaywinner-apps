@@ -10,7 +10,7 @@
     } */
 	$whichProtocol = ((isset($_SERVER['HTTPS'])) && ($_SERVER['HTTPS'] == "on") ? 'https://' : 'http://');
 	$rootlink = $whichProtocol . $rootlink;
-    $winnersData = json_decode(file_get_contents($rootlink."/feature/EDW/app/confirm/fetchWgWinnerCircle/fullCircle"));
+    $winnersData = json_decode(file_get_contents($rootlink."/feature/EDW/confirm/fetchWgWinnerCircle/fullCircle"));
     $winnersCircle = $winnersData->edw_winners;
 
 ?>

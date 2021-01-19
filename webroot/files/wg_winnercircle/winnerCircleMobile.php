@@ -32,6 +32,6 @@ class WinnerCircleJsonReader
 $whichProtocol = "http://";
 $whichProtocol = ((isset($_SERVER['HTTPS'])) && ($_SERVER['HTTPS'] == "on") ? 'https://' : 'http://');
 
-$winnerCircle= new WinnerCircleJsonReader($whichProtocol."www.everydaywinner.com/feature/EDW/app/confirm/fetchWgWinnerCircle/fullCircle");
+$winnerCircle= new WinnerCircleJsonReader($whichProtocol."www.everydaywinner.com/feature/EDW/confirm/fetchWgWinnerCircle/fullCircle");
 echo $winnerCircle->printHtmlWinnners();
 ?>

@@ -9,7 +9,7 @@ class WinnersTable extends Table {
 
     public function initialize(array $config){
         $this->hasOne('Standings');
-        $this->belongsTo('Prizes');
+        $this->belongsTo('Prizes',['propertyName' => 'Prize']);
     }
     public function findByToken(Query $query, array $options){
         $token = $options['token'];

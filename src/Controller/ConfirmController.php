@@ -3,7 +3,8 @@
 namespace App\Controller;
 
 use App\Shell\ConsoleShell;
-use App\Shell\EDWWinnerJsonExportShell;
+// use App\Shell\EDWWinnerJsonExportShell;
+use App\Command\EDWWinnerJsonExportCommand;
 use Cake\Controller\Controller;
 use Cake\Event\Event;
 // use Cake\Datasource\ConnectionManager;
@@ -41,10 +42,10 @@ class ConfirmController extends AppController {
     public function testItemClass(){
         // $this->loadModel('Sites');
         // die("haha shit...");
-        $response = [
-            'status' => "success",
-            "data" => []
-        ];
+        // $response = [
+        //     'status' => "success",
+        //     "data" => []
+        // ];
         // $this->Sendgrid
         // $test = New SendGrid();
         // debug($test);
@@ -91,12 +92,23 @@ class ConfirmController extends AppController {
         // debug($this->response->withStringBody(json_encode($response)));
         // die();
         // $this->Winners->id = "holla mundo";
-        debug($this->SiteConfigs->find('all')->first());
+        $winnerCircleCommand = new EDWWinnerJsonExportCommand();
+        // debug($winnerCircleCommand);
+        // debug($winnerCircleShell->checkWinnerFeedWasCreatedToday());
+        // debug($this);
+        // $winnerCircleCommand->randomWinner();
+        $winnerCircleCommand->saveYesterdayWinner();
+        $winnerCircleCommand->lastSundayWinner();
+        $winnerCircleCommand->randomWinner();
+        // debug($winnerCircleShell->show());
         die();
-        $winnerCircleShell = new EDWWinnerJsonExportShell();
-        $winnerCircleShell->checkWinnerFeedExists();
-        debug($winnerCircleShell);
-        die();
+
+        // debug($winnerCircleShell->checkWinnerFeedExists());
+        // debug($this->SiteConfigs->find('all')->first());
+        // $winnerCircleShell = new EDWWinnerJsonExportShell();
+        // $winnerCircleShell->checkWinnerFeedExists();
+        // debug($winnerCircleShell);
+        // die();
 
     }
 
@@ -488,7 +500,7 @@ class ConfirmController extends AppController {
             'data' => []
         ];
 
-        $winnerCircleShell = new EDWWinnerJsonExportShell();
+        $winnerCircleShell = new EDWWinnerJsonExportCommand();
         if ($winnerCircleShell->checkWinnerFeedExists()) {
             if ($winnerCircleShell->checkWinnerFeedWasCreatedToday()) {
                 $response['data']['result'] = false;
@@ -510,7 +522,7 @@ class ConfirmController extends AppController {
         Log::write('debug', "Site code =".$siteCode);
         $this->autoRender = false;
         try {
-            $winneCirclerShell = new EDWWinnerJsonExportShell();
+            $winneCirclerShell = new EDWWinnerJsonExportCommand();
 
             if ($siteCode == 'EDW') {
                 $pastWinner = $winneCirclerShell->saveYesterdayWinner($siteCode);

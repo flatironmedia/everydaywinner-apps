@@ -8,11 +8,18 @@ use Cake\Core\Configure;
 use Cake\Controller\Controller;
 use Cake\Log\Log;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 // App::uses('Component', 'Controller');
 // App::uses('Controller', 'ComponentCollection');
 
 class EDWWinnerJsonExportShell extends Shell
 {
+    public function initialize()
+    {
+        parent::initialize();
+        // $this->Winners = TableRegistry::get("Winners");
+        $this->loadModel('Winners');
+    }
     public $uses = array('Winner','Standing','Status', 'Site', 'Prize', 'PrizeSchedule');
 
     var $statesUS = array('AL' => 'Alabama','AK' => 'Alaska','AZ' => 'Arizona','AR' => 'Arkansas','CA' => 'California',
@@ -281,14 +288,21 @@ class EDWWinnerJsonExportShell extends Shell
      */
     public function yesterdaywinner()
     {
-        $result=$this->Winner->find('first',array(
+        
+        // $test = $Winners->find('byToken', ['token' => '588768d8787df1485269208']);
+        // debug($test->first());
+        debug($this);
+        die();
+        $result=$this->Winners->find('all',array(
             'conditions'=>array(
                 "Standing.status_id !="=>6,
                 'Standing.date_won >='=>date("Y-m-d",strtotime('today -1 day')),
                 'Standing.site_id' => 1
             ),
             'order'=>array('Winner.id' => 'DESC' )
-        ));
+        ))->first();
+        debug($result);
+        die();
         if (empty($result))
         {
             $result=$this->yesterdayRandomWinner();//generate a random winner
@@ -298,7 +312,20 @@ class EDWWinnerJsonExportShell extends Shell
         file_put_contents(WWW_ROOT."files\\winnercircle\\yesterdaywinner.txt", $this->getformattedYesterdayWinnerJson($result, true));
         return $this->getformattedYesterdayWinnerJson($result);
     }
-
+    
+    public function show()
+    {
+        // debug($this->args[0]);
+        // if (empty($this->args[0])) {
+        //     // Use error() before CakePHP 3.2
+        //     return $this->abort('Please enter a username.');
+        // }
+        $user = $this->Winners->find('byToken', ['token' => '588768d8787df1485269208'])->first();
+        $this->out(print_r($user, true));
+    }
+    // public function main(){
+    //     $this->out();
+    // }
     /**
      * Generate a json output with 1 WG winner with the date_won = last sunday date
      */
@@ -329,7 +356,9 @@ class EDWWinnerJsonExportShell extends Shell
     {
         $yesterdayWinnerSection = $this->winnerxmlyesterdaysection();
         $unclaimnedWinnerSection = $this->winnerxmlunclamiedprizessection(2);
-
+        debug($yesterdayWinnerSection);
+        // debug($unclaimnedWinnerSection);
+        die();
         $xml = '
             <feed>
             <mailing>
@@ -365,7 +394,7 @@ class EDWWinnerJsonExportShell extends Shell
 
     private function winnerxmlunclamiedprizessection($numberOfWinners)
     {
-        $result = $this->Winner->find('all',array(
+        $result = $this->Winners->find('all',array(
             'conditions'=>array(
                 'Standing.status_id' => 2,
                 'Standing.date_won >' => date('Y-m-d H:i:s', strtotime("11/1/2016" )),

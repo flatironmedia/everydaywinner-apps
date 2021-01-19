@@ -29,6 +29,6 @@ class WinnerCircleJsonReader
     }
 }
 
-$winnerCircle= new WinnerCircleJsonReader("http://www.everydaywinner.com/feature/EDW/app/confirm/fetchWinnerCircle/fullCircle");
+$winnerCircle= new WinnerCircleJsonReader("http://www.everydaywinner.com/feature/EDW/confirm/fetchWinnerCircle/fullCircle");
 echo $winnerCircle->printHtmlWinnners();
 ?>

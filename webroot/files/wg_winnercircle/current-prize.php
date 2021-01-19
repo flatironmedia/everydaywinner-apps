@@ -8,7 +8,7 @@ $rootUrl = "west.everydaywinner.com";
 $whichProtocol = "http://";
 $rootUrl = $whichProtocol . $rootUrl;
 
-$prizeEndpoint = $rootUrl . "/feature/EDW/app/confirm/currentPrize/WG";
+$prizeEndpoint = $rootUrl . "/feature/EDW/confirm/currentPrize/WG";
 $response = json_decode(file_get_contents($prizeEndpoint));
 
 if (!empty($response)) {

@@ -2,14 +2,12 @@
 
 namespace App\Controller;
 
-use App\Shell\ConsoleShell;
-// use App\Shell\EDWWinnerJsonExportShell;
-use App\Command\EDWWinnerJsonExportCommand;
 use Cake\Controller\Controller;
+use App\Command\EDWWinnerJsonExportCommand;
+
 use Cake\Event\Event;
-// use Cake\Datasource\ConnectionManager;
 use Cake\Routing\Router;
-// use DateTime;
+use DateTime;
 use Cake\ORM\TableRegistry;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
@@ -25,6 +23,7 @@ class ConfirmController extends AppController {
         $this->loadModel('Winners');
         $this->loadModel('Standings');
         $this->loadModel('SiteConfigs');
+        $this->loadModel('PrizeSchedules');
         $this->loadModel('Sites');
     }
 	public function beforeFilter(Event $event) {
@@ -66,20 +65,32 @@ class ConfirmController extends AppController {
 
         // $winnerSelected = $this->Winners->find('byToken', ['token' => '588768d8787df1485269208']);
         // debug($this);
-        // debug($winnerSelected->first());
+        // $winner = $this->Winners->findById(3324)->contain(['Standings'])->first();
+        // debug($winner['Standings']);
+        // debug($winner['standing']);
+        // die();
         // $winner = $winnerSelected->first();
         // debug($winner);
         // die();
         // debug($winner['Standings']['site_id']);
         // $site = $this->Sites->find('all')->where(['id' => $winner['Standings']['site_id']])->first();
         // $site1 = $this->Sites->findById(1)->all();
+        $todayDate = new \DateTime();
+        $weekNumber = $todayDate->format("W");
         // $site = $this->Sites->find('all', array(
-        //     'conditions' => array('id' => $winner['Standings']['site_id'])
+        //     'conditions' => array('id' => $winner['standing']['site_id'])
         //     ))->first();
-        // debug($site['code']);
+
+        $data = $this->PrizeSchedules->find("all", [
+            'contain' => ['Prizes'],
+            'conditions' => [
+                'week_number' => $weekNumber
+            ]
+        ])->first();
+        debug($data);
         // debug($site1);
         // debug($this);
-        // die();
+        die();
         // debug($this->session->read('Winner.Address'));
         // debug($this->Standings->find('all')->all());
         // die();
@@ -92,15 +103,31 @@ class ConfirmController extends AppController {
         // debug($this->response->withStringBody(json_encode($response)));
         // die();
         // $this->Winners->id = "holla mundo";
-        $winnerCircleCommand = new EDWWinnerJsonExportCommand();
+        // $winnerCircleCommand = new EDWWinnerJsonExportCommand();
         // debug($winnerCircleCommand);
+        // die();
         // debug($winnerCircleShell->checkWinnerFeedWasCreatedToday());
         // debug($this);
         // $winnerCircleCommand->randomWinner();
-        $winnerCircleCommand->saveYesterdayWinner();
-        $winnerCircleCommand->lastSundayWinner();
-        $winnerCircleCommand->randomWinner();
+        // $winnerCircleCommand->saveYesterdayWinner();
+        // $winnerCircleCommand->lastSundayWinner();
+        // $winnerCircleCommand->randomWinner();
         // debug($winnerCircleShell->show());
+
+        $mergeInfo = ["mergeInfo"  => [
+            "address" => null,
+            "fullname" => 'Curtis P Jordan',
+            "email" => 'Testlouisianacreolepolo@gmail.com',
+            "city" => null,
+            "state" =>null,
+            "zip" => null,
+            "phone" => null,
+        ]];
+        // $winner = $this->Winners->find('byToken', ['token' => '588768d8787df1485269208'])->first();
+        // debug($winner);
+        debug($this->EchoSign->getwinnerwidget($mergeInfo, 'EDW'));
+        // debug($this);
+        // debug($this->Test->TestThis());
         die();
 
         // debug($winnerCircleShell->checkWinnerFeedExists());
@@ -112,49 +139,48 @@ class ConfirmController extends AppController {
 
     }
 
-    public function congratulations($token = null){
-        // $this->layout='ewlayout';
+    public function congratulations($token = null)
+    {
         $this->viewBuilder()->getLayout('ewlayout');
         $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
 
         if ($token == null) {
-            return $this->redirect(array('action' => 'linkexpired'));
+            return $this->redirect(['action' => 'linkexpired']);
         }
         $token = base64_decode($token);
 
-        // $winner = $this->Winners->findByToken($token);
         $winner = $this->Winners->find('byToken', ['token' => $token])->first();
         if (!empty($winner)) {
             $site = $this->Sites->find('all', array(
-            'conditions' => array('id' => $winner['Standings']['site_id'])
+            'conditions' => array('id' => $winner['standing']['site_id'])
             ))->first();
             $siteCode = $site['code'];
         }
-
+        $session = $this->getRequest()->getSession();
         if($this->request->is('get')){
             if(!isset($winner)) return $this->redirect(array('action'=>'linkexpired'));
+            
+            $this->Winners->id = $winner['id'];
+            $this->Standings->id = $winner['standing']['id'];
 
-            $this->Winner->id = $winner['Winner']['id'];
-            $this->Standing->id = $winner['Standing']['id'];
+            $dateWon = date("l, F j, Y",strtotime($winner['standing']['date_won']));
 
-            $dateWon = date("l, F j, Y",strtotime($winner['Standing']['date_won']));
+            if($winner['Standings']['status_id'] == 2){ // Notified Status
 
-            if($winner['Standing']['status_id'] == 2){ // Notified Status
-
-                if($this->Standing->save(array('status_id'=>3)))// Clicked Status
+                if($this->Standings->save(['status_id'=>3]))// Clicked Status
                 {
-                    $this->Notes->noteLog("Winner clicked on notification email",$this->Winner->id);
+                    $this->Notes->noteLog("Winner clicked on notification email",$this->Winners->id);
                 }
             }
-
-            $this->set(array('winnerData'=> $winner['Winner'],'dateWon'=>$dateWon,'expire'=>$winner['Standing']['expire'],'statesUS'=>$this->EDWThings->getarrayValue('US_States')));
-            $this->set('savedWinnerAddress',$this->Session->read('Winner.Address'));
-            $this->set('savedWinnerCity',$this->Session->read('Winner.City'));
-            $this->set('savedWinnerState',$this->Session->read('Winner.State'));
-            $this->set('savedWinnerZip',$this->Session->read('Winner.Zip'));
-            $this->set('savedWinnerphone',$this->Session->read('Winner.phone'));
-            $this->set('winnerTitle', $this->Sites->getSiteConfig('winnerTitle', $siteCode));
-            $this->set('sitePrize', $this->Sites->getSiteConfig('prize', $siteCode));
+            
+            $this->set(array('winnerData'=> $winner['Winner'],'dateWon'=>$dateWon,'expire'=>$winner['standing']['expire'],'statesUS'=>$this->EDWThings->getarrayValue('US_States')));
+            $this->set('savedWinnerAddress',$session->read('Winner.Address'));
+            $this->set('savedWinnerCity',$session->read('Winner.City'));
+            $this->set('savedWinnerState',$session->read('Winner.State'));
+            $this->set('savedWinnerZip',$session->read('Winner.Zip'));
+            $this->set('savedWinnerphone',$session->read('Winner.phone'));
+            $this->set('winnerTitle', $this->Site->getSiteConfig('winnerTitle', $siteCode));
+            $this->set('sitePrize', $this->Site->getSiteConfig('prize', $siteCode));
             $this->set('siteCode', $siteCode);
             $this->set('requestSiteCode', $requestSiteCode);
         }
@@ -178,11 +204,11 @@ class ConfirmController extends AppController {
             unset($this->request->data['first_name']);
             unset($this->request->data['last_name']);
 
-            $this->Session->write('Winner.Address', $this->request->data['address_given']);
-            $this->Session->write('Winner.City', $this->request->data['city_given']);
-            $this->Session->write('Winner.State', $this->request->data['state_given']);
-            $this->Session->write('Winner.Zip', $this->request->data['zip_given']);
-            $this->Session->write('Winner.phone', $this->request->data['phone_given']);
+            $session->write('Winner.Address', $this->request->data['address_given']);
+            $session->write('Winner.City', $this->request->data['city_given']);
+            $session->write('Winner.State', $this->request->data['state_given']);
+            $session->write('Winner.Zip', $this->request->data['zip_given']);
+            $session->write('Winner.phone', $this->request->data['phone_given']);
 
 
             $this->Winner->id = $this->request->data['id'];
@@ -194,7 +220,7 @@ class ConfirmController extends AppController {
             return $this->redirect(
                 array(
                     'action' => 'agreements',
-                    base64_encode($winner['Winner']['token']),
+                    base64_encode($winner['token']),
                     "widgeturl" => $encodedSignUrl,
                     "?" => array (
                         'site' => $siteCode
@@ -207,7 +233,7 @@ class ConfirmController extends AppController {
 	public function linkexpired()
 	{
         $this->viewBuilder()->setLayout('ewlayout');
-		// $this->layout='ewlayout';
+
 	}
 
 	public function winnerData(){
@@ -220,17 +246,17 @@ class ConfirmController extends AppController {
 		$newWinnerData = $this->request->data['winner'];
 		$winnerId = intval(base64_decode($newWinnerData['winnerId']));
 
-		$winner = $this->Winner->findById($winnerId);
+		$winner = $this->Winners->findById($winnerId)->first();
 		$isValid = false;
 
-		$phoneNumber = preg_replace('/[-()+ ]/', "", $winner['Winner']['phone']);
+		$phoneNumber = preg_replace('/[-()+ ]/', "", $winner['phone']);
 		if($phoneNumber != ""){
 			$phoneNumber = ($phoneNumber[0] == 1) ? substr($phoneNumber, 1) : $phoneNumber;
 		}
-		$stateIsValid=($newWinnerData['state'] == $winner['Winner']['state']);
-		$cityIsValid=strtolower(trim($newWinnerData['city'])) ==strtolower(trim($winner['Winner']['city']));
-		$phoneIsValid=(!empty($winner['Winner']['phone']))?($newWinnerData['phone'] == $phoneNumber):true;
-		$zipIsValid=$newWinnerData['zip'] == $winner['Winner']['zip'];
+		$stateIsValid=($newWinnerData['state'] == $winner['state']);
+		$cityIsValid=strtolower(trim($newWinnerData['city'])) ==strtolower(trim($winner['city']));
+		$phoneIsValid=(!empty($winner['phone']))?($newWinnerData['phone'] == $phoneNumber):true;
+		$zipIsValid=$newWinnerData['zip'] == $winner['zip'];
 
 		if($stateIsValid
 			// && $newWinnerData['address'] == $winner['Winner']['address']
@@ -239,8 +265,8 @@ class ConfirmController extends AppController {
 			&& $zipIsValid){
 			$isValid = true;
 		}
-		$this->Winner->id = $winner['Winner']['id'];
-		$this->Winner->save(array('address_flag'=>$isValid)); //This is used to signify the address is unconfirmed
+		$this->Winners->id = $winner['id'];
+		$this->Winners->save(array('address_flag'=>$isValid)); //This is used to signify the address is unconfirmed
 
 		echo json_encode(array('isValid'=>$isValid, 'phone'=>$phoneNumber));
 
@@ -260,16 +286,16 @@ class ConfirmController extends AppController {
        	$token = base64_decode($token);
        	$widgetUrl = base64_decode($encodedEsignWidgetUrl);
         if($this->request->is('get')){
-        	$winner = $this->Winner->findByToken($token);
-            $site = $this->Site->find('first', array(
-                'conditions' => array('id' => $winner['Standing']['site_id'])
-            ));
-            $siteCode = $site['Site']['code'];
+            $winner = $this->Winners->find('ByToken', ['token' =>$token])->first();
+            $site = $this->Sites->find('all', array(
+                'conditions' => array('id' => $winner['standing']['site_id'])
+            ))->first();
+            $siteCode = $site['code'];
         	$displayAgreements = false;
-        	if($winner['Standing']['status_id'] == 3){
+        	if($winner['standing']['status_id'] == 3){
         		$displayAgreements = true;
                 $widget = $this->SiteConfig->getConfigBySiteCode('echo_sign_widget_url', $siteCode);
-        		$this->Session->write('Winner.id', base64_encode($winner['Winner']['id']));
+        		$this->getRequest()->getSession()->write('Winner.id', base64_encode($winner['id']));
         		$this->set('displayAgreements', $displayAgreements);
 				$this->set('widget', $widgetUrl);
                 $this->set('requestSiteCode', $requestSiteCode);
@@ -283,80 +309,79 @@ class ConfirmController extends AppController {
 
     public function sentdocumentlistener()
     {
-        // $this->layout = 'ajax';
         $this->autoRender = false;
         $this->viewBuilder()->setLayout('ajax');
 
         $winnerId = base64_decode($this->request->query['winnerId']);
-        $winner = $this->Winners->findById($winnerId);
+        $winner = $this->Winners->findById($winnerId)->contain(['standing'])->first();
 
         switch ($this->request->query['eventType']) {
             case 'EMAIL_VIEWED':
-                $winner['Standing']['status_id'] = 3; //Status Clicked
+                $winner['standing']['status_id'] = 3; //Status Clicked
                 break;
             case 'ESIGNED':
                 $docKey = $this->request->query['documentKey'];
-                $winner['Winner']['doc_key'] = $docKey;
-                $winner['Standing']['status_id'] = 4; //Status Signed
-                $winner['Standing']['expire'] = 1;
+                $winner['doc_key'] = $docKey;
+                $winner['standing']['status_id'] = 4; //Status Signed
+                $winner['standing']['expire'] = 1;
                 break;
             
             default:
                 return;
         }
-        $this->Winner->save($winner);
-        $this->Winner->Standing->save($winner);
+        $this->Winners->save($winner);
+        $this->Winners->Standings->save($winner);
     }
     public function confirmed(){
-        // $this->layout = "ajax";
+
         $this->autoRender = false;
         $this->viewBuilder()->setLayout("ajax");
 
         if($this->request->is('get')){
     		$docKey = $this->request->query['documentKey'];
-    		$winnerId = base64_decode($this->Session->read('Winner.id'));
+    		$winnerId = base64_decode($this->getRequest()->getSession()->read('Winner.id'));
 
     		if(empty($docKey) || empty($winnerId)){
     			return $this->redirect(array('action'=>'linkexpired'));
     		}
 
-    		$winner = $this->Winner->findById($winnerId);
-            $site = $this->Site->find('first', array(
-                'conditions' => array('id' => $winner['Standing']['site_id'])
-            ));
-            $siteCode = $site['Site']['code'];
+    		$winner = $this->Winners->findById($winnerId)->contain(['Standings'])->first();
+            $site = $this->Sites->find('all', array(
+                'conditions' => array('id' => $winner['standing']['site_id'])
+            ))->first();
+            $siteCode = $site['code'];
 
-    		if(!isset($winner['Winner']))
+    		if(!isset($winner))
 			{
 				return $this->redirect(array('action'=>'linkexpired'));
 			}
 
-    		$this->Winner->id = $winnerId;
+    		$this->Winners->id = $winnerId;
 
     		//Save EchoSign DocKey Here.
-    		if($winner['Standing']['status_id'] == 3){
+    		if($winner['standing']['status_id'] == 3){
 
-    			$winner['Winner']['doc_key'] = $docKey;
-    			$winner['Standing']['status_id'] = 4; //Status Signed
-				$winner['Standing']['expire'] = 1;
+    			$winner['doc_key'] = $docKey;
+    			$winner['standing']['status_id'] = 4; //Status Signed
+				$winner['standing']['expire'] = 1;
 				$viewVars = array(
-		            'name'=>ucwords(strtolower($winner['Winner']['first_name']))
+		            'name'=>ucwords(strtolower($winner['first_name']))
 		        );
 
-                $this->SendEmail->sendEmail($winner['Winner']['email'],
+                $this->SendEmail->sendEmail($winner['email'],
                     $this->SiteConfig->getConfigBySiteCode('thankyou_email_subject', $siteCode),
                     $siteCode . DS . 'thankyou',
                     $viewVars
                 );
-    			$this->Winner->save($winner);
-    			$this->Winner->Standing->save($winner);
-				$this->Notes->noteLog("Winner signed release",$this->Winner->id);
+    			$this->Winners->save($winner);
+    			$this->Winners->Standings->save($winner);
+				$this->Notes->noteLog("Winner signed release",$this->Winners->id);
     		}
 
     		return $this->redirect(array(
                 'action' => 'winnerphotoconfirmationupload',
                 '?' => array('site' => $siteCode),
-                base64_encode($winner['Winner']['token']),
+                base64_encode($winner['token']),
 
             ));
 
@@ -365,27 +390,27 @@ class ConfirmController extends AppController {
     }
 
     public function shareGoodNews($token=null){
-        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
-        // $this->layout='ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
+        $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
+
     	if($token == null){ return $this->redirect(array('action'=>'linkexpired')); }
 
 		if($this->request->is('get')){
 	    	$token = base64_decode($token);
 
-	    	$winner = $this->Winner->findByToken($token);
-            $site = $this->Site->find('first', array(
-                'conditions' => array('id' => $winner['Standing']['site_id'])
-            ));
-            $siteCode = $site['Site']['code'];
+	    	$winner = $this->Winners->find('ByToken',['token' => $token])->contain(['Standings'])->first();
+            $site = $this->Sites->find('all', array(
+                'conditions' => array('id' => $winner['standing']['site_id'])
+            ))->first();
+            $siteCode = $site['code'];
 
-	    	if(!isset($winner['Winner'])){ return $this->redirect(array('action'=>'linkexpired')); }
+	    	if(!isset($winner)){ return $this->redirect(array('action'=>'linkexpired')); }
 
-			$currentUrl = $this->baseUrl.'everydaywinners/sharegoodnews/'.base64_encode($winner['Winner']['token']);
+			$currentUrl = $this->baseUrl.'everydaywinners/sharegoodnews/'.base64_encode($winner['token']);
 
-			if($winner['Standing']['status_id'] == 4 || $winner['Standing']['status_id'] == 6){
+			if($winner['standing']['status_id'] == 4 || $winner['standing']['status_id'] == 6){
 				$this->set(array('winner'=>$winner, 'baseUrl'=>$this->baseUrl, 'currentUrl'=>$currentUrl));
-                $this->set('sitePrize', $this->Sites->getSiteConfig('prize', $siteCode));
+                $this->set('sitePrize', $this->Site->getSiteConfig('prize', $siteCode));
                 $this->set('siteCode', $siteCode);
                 $this->set('requestSiteCode', $requestSiteCode);
 			} else {
@@ -398,32 +423,31 @@ class ConfirmController extends AppController {
 
 	public function winnerphotoconfirmationupload($token=null)
 	{
-        // $this->layout = 'ewlayout';
         $this->viewBuilder()->setLayout('ewlayout');
         $requestSiteCode = !empty($this->request->getQuery('site')) ? $this->request->getQuery('site') : 'EDW';
 
         if($token == null){return $this->redirect(array('action'=>'linkexpired'));}
         $decodedToken = base64_decode($token);
-        $winner = $this->Winner->findByToken($decodedToken);
+        $winner = $this->Winners->find('ByToken', ['token' => $decodedToken])->first();
         if (!empty($winner)) {
-            $site = $this->Site->find('first', array(
-                'conditions' => array('id' => $winner['Standing']['site_id'])
-            ));
-            $siteCode = $site['Site']['code'];
+            $site = $this->Sites->find('all', array(
+                'conditions' => array('id' => $winner['standing']['site_id'])
+            ))->first();
+            $siteCode = $site['code'];
         }
 
 		if ($this->request->is('post'))
         {
-			if(isset($this->request->data['croppedImageUrl'])) $winner['Winner']['photo']=$this->request->data['croppedImageUrl'];
-			if(isset($this->request->data['happyReason'])) $winner['Winner']['blurb']=$this->request->data['happyReason'];
+			if(isset($this->request->data['croppedImageUrl'])) $winner['photo']=$this->request->data['croppedImageUrl'];
+			if(isset($this->request->data['happyReason'])) $winner['blurb']=$this->request->data['happyReason'];
 
-			$this->Winner->id = $winner['Winner']['id'];
-			$this->Winner->save($winner['Winner']);
+			$this->Winners->id = $winner['id'];
+			$this->Winners->save($winner);
 
 			return $this->redirect(
                 array(
                     'action'=>'sharegoodnews',
-                    base64_encode($winner['Winner']['token']),
+                    base64_encode($winner['token']),
                     '?' => array('requestSiteCode' => $siteCode)
                 )
             );
@@ -431,8 +455,8 @@ class ConfirmController extends AppController {
 
 		$this->set(array('token'=>$token));
         $this->set('site', $siteCode);
-        $this->set('winnerTitle', $this->Sites->getSiteConfig('winnerTitle', $siteCode));
-        $this->set('siteName', $this->Sites->getSiteConfig('name', $siteCode));
+        $this->set('winnerTitle', $this->Site->getSiteConfig('winnerTitle', $siteCode));
+        $this->set('siteName', $this->Site->getSiteConfig('name', $siteCode));
         $this->set('requestSiteCode', $requestSiteCode);
 	}
 
@@ -448,17 +472,17 @@ class ConfirmController extends AppController {
 				$fileIndex = "thumbImage";
 			}
 			if (!empty($token)) {
-                $winner=$this->Winner->findByToken($token);
-                $site = $this->Site->find('first', array(
+                $winner=$this->Winners->find('ByToken',['token' => $token])->first();
+                $site = $this->Sites->find('all', array(
                 'conditions' => array('id' => $winner['Standing']['site_id'])
-                ));
-                $siteCode = $site['Site']['code'];
-                $fileName=date("Ymd",strtotime($winner['Standing']['date_won']))."-".$winner['Winner']['visitor_id']."-".$timeOfUpload."-".$scale.".jpg";
+                ))->first();
+                $siteCode = $site['code'];
+                $fileName=date("Ymd",strtotime($winner['standing']['date_won']))."-".$winner['visitor_id']."-".$timeOfUpload."-".$scale.".jpg";
             }
 
-			$imageUrl=$this->webroot . $this->Sites->getSiteConfig('photo_upload_path', $siteCode) . $fileName;
+			$imageUrl=$this->webroot . $this->Site->getSiteConfig('photo_upload_path', $siteCode) . $fileName;
 
-            $imagedestination = WWW_ROOT . $this->Sites->getSiteConfig('photo_upload_path', $siteCode) . $fileName;;
+            $imagedestination = WWW_ROOT . $this->Site->getSiteConfig('photo_upload_path', $siteCode) . $fileName;;
 			//saves posted file to server
 			if (isset($_FILES[$fileIndex])) {
 				move_uploaded_file(
@@ -481,7 +505,7 @@ class ConfirmController extends AppController {
         $imageData=base64_decode($this->request->data['fileData']);
         $siteCode = !empty($this->request->data['siteCode']) ? $this->request->data['siteCode'] : 'EDW';
 
-        $imagedestination=WWW_ROOT . $this->Sites->getSiteConfig('photo_upload_path', $siteCode) . $fileName;
+        $imagedestination=WWW_ROOT . $this->Site->getSiteConfig('photo_upload_path', $siteCode) . $fileName;
 
         file_put_contents(
             $imagedestination,
@@ -616,12 +640,12 @@ class ConfirmController extends AppController {
             case 'WG': {
                 $todayDate = new \DateTime();
                 $weekNumber = $todayDate->format("W");
-                $data = $this->PrizeSchedule->find("first", [
-                    'contain' => ['Prize'],
+                $data = $this->PrizeSchedules->find("all", [
+                    'contain' => ['Prizes'],
                     'conditions' => [
                         'week_number' => $weekNumber
                     ]
-                ]);
+                ])->first();
 
                 $response['data']['current_prize'] = $data['Prize']["name"];
                 break;

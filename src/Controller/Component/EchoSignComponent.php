@@ -2,46 +2,42 @@
 
 namespace App\Controller\Component;
 
-// App::uses('Component', 'Controller');
-
+use Cake\Controller\Component;
 use Cake\Routing\Router;
 use Cake\ORM\TableRegistry;
 use Cake\Filesystem\Folder;
 use Cake\Filesystem\File;
-use App\Controller\DefaultConfigController;
-use Cake\Core\Configure;
 use Exception;
-use Cake\Controller\Component;
-use Cake\Controller\Controller;
-// use Cake\Controller\Controller;
+use Cake\Log\Log;
+use Cake\Core\Configure;
 
-// App::build(array('Vendor' => array(APP . 'Vendor' . DS . 'EchoSign')));
-
-use EchoSign\API,
-    EchoSign\Info\FileInfo,
-    EchoSign\Info\MergeFieldInfo,
-    EchoSign\Info\WidgetCreationInfo,
-    EchoSign\Info\RecipientInfo,
-    EchoSign\Info\SenderInfo,
-    EchoSign\Info\DocumentCreationInfo,
-    EchoSign\Info\AbstractCreationInfo,
-    EchoSign\Options\GetDocumentUrlsOptions,
-    EchoSign\Options\GetDocumentsOptions,
-    EchoSign\Options\AbstractDocumentOptions;
-
+//Try to import the Lib in other way.
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'API.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'FileInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'MergeFieldInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'RecipientInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'SenderInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'AbstractCreationInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'DocumentCreationInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Info'.DS.'WidgetCreationInfo.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Options'.DS.'AbstractDocumentOptions.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Options'.DS.'GetDocumentsOptions.php');
+require_once(ROOT.DS.'src'.DS.'Lib'.DS.'EchoSign'.DS.'Options'.DS.'GetDocumentUrlsOptions.php');
 
 class EchoSignComponent extends Component {
 
     public $apiKey = '';
+
     private $client = null;
     private $api = null;
     private $baseUrl = null;
     private $DefaultConfig = null;
 
-    public $components = ['Site'];
+    public $components = ['Site', 'AdobeSignRestApi'];
 
-    public function initialize($controller) {
-        parent::initialize($controller);
+    public function initialize(array $config)
+    {
+        parent::initialize($config);
         $this->DefaultConfig = TableRegistry::getTableLocator()->get("DefaultConfigs");
         $this->SiteConfig = TableRegistry::getTableLocator()->get("SiteConfigs");
         $this->apiKey = $this->SiteConfig->getConfigBySiteCode('echo_sign_api_key', 'EDW');
@@ -202,21 +198,18 @@ class EchoSignComponent extends Component {
         $message=str_replace('[datewon]',$dateWon, $message );
         return $message;
     }
-
+    //This if set for when  echosign is going to be used  someday here
     public function getWinnerWidget($options, $siteCode = 'EDW'){
         $documentKey = null;
         $fileFullPath = $this->Site->getSiteConfig('release_document_url', $siteCode);
         $fileFullPath = isset($options['filePath']) ? $options['filePath'] : $fileFullPath;
-        $file = \EchoSign\Info\FileInfo::createFromFile($fileFullPath);
+
         if (isset($options["mergeInfo"])) {
             $mergeInfo = new \EchoSign\Info\MergeFieldInfo($options["mergeInfo"]);
             $options["mergeInfo"] = $mergeInfo;
         }
-
-        $options['siteCode'] = $siteCode;
-        $document = $this->getWidgetCreationInfo($file, $options);
-        $widgetResult = $this->getAPI()->createUrlWidget($document, NULL);
-
+        $document = $this->AdobeSignRestApi->createWidgetInfo($fileFullPath, $options);
+        $widgetResult = $document;
         return $widgetResult;
     }
 

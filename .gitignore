@@ -5,6 +5,7 @@
 /logs/*
 /tmp/*
 /vendor/*
+ngrok.exe
 /webroot/files/wg_winnerphoto/*
 /webroot/files/winnerphoto/*
 /webroot/files/wg_winnercircle/featuredwinner.json

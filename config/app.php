@@ -19,10 +19,10 @@ return [
      */
     'debug' => filter_var(env('DEBUG', false), FILTER_VALIDATE_BOOLEAN),
     'DEVELOPMENT_MODE' => true,
-    'Adobe.redirect_uri' => 'https://west.everydaywinner.com/feature/EDW/app_new',
-	'Adobe.client_id' => 'CBJCHBCAABAAHlcs62iDUFXppT-fM6dNmbr8v8j910Kl',
-	'Adobe.client_secret' => 'tUu5n-2bek_BK2ddl0ZURnKWj3IrLUbN',
-	'Adobe.refresh_token' => '3AAABLblqZhBlsv0sr7gbKJntczj4fzukom-NaLZeCObZkhO3PLU8wPsrDg9jqIH1zcCLk_tHHRA*' ,
+    'Adobe.redirect_uri' => '',
+	'Adobe.client_id' => '',
+	'Adobe.client_secret' => '',
+	'Adobe.refresh_token' => '' ,
     /**
      * A random string used in security hashing methods.
      */

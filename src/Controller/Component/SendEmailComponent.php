@@ -37,12 +37,11 @@ class SendEmailComponent extends Component {
     }
 
     private function getEmailHelper(){
-        $DefaultConfigsTable = TableRegistry::getTableLocator()->get('DefaultConfig');
         $siteConfigsTable = TableRegistry::getTableLocator()->get('SiteConfig');
 
         $host = $siteConfigsTable->getConfigBySiteCode('smtp_host', 'EDW');
         $sender = $siteConfigsTable->getConfigBySiteCode('smtp_email', 'EDW');
-        $password = $DefaultConfigsTable->decrypt($siteConfigsTable->getConfigBySiteCode('smtp_password', 'EDW'));
+        $password = $siteConfigsTable->decrypt($siteConfigsTable->getConfigBySiteCode('smtp_password', 'EDW'));
         $port = $siteConfigsTable->getConfigBySiteCode('smtp_port', 'EDW');
 
         $Email = new Email(array(

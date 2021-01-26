@@ -377,7 +377,10 @@ class EDWWinnerJsonExportCommand extends Command
             'Standings.site_id' => 1
         ])->order(['rand()'])->limit($numberOfWinners)->all();
 
-        usort($result, function ($a,$b)
+        $listOfWinners = [];
+        foreach($result as $item){$listOfWinners[] = $item;}
+
+        usort($listOfWinners, function ($a,$b)
         {
             return -(strtotime($a['Standings']['date_won']) - strtotime($b['Standings']['date_won']) ); // Order by date DESC
         });

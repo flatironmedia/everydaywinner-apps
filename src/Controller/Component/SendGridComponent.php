@@ -93,8 +93,8 @@ class SendGridComponent extends Component {
             //Get Yesterday Winner 
             $Winner = TableRegistry::getTableLocator()->get('Winners');
 
-            $lastWinner = $Winner->find('first', array('order'=>'Winner.id desc', 'fields'=>array('first_name', 'last_name', 'city', 'state')));
-            $winnerName = $lastWinner['Winner']['first_name'].' '.substr($lastWinner['Winner']['last_name'],0,1).'. '.$lastWinner['Winner']['city'].', '.$lastWinner['Winner']['state'];
+            $lastWinner = $Winner->find('all', array('order'=>'Winner.id desc', 'fields'=>array('first_name', 'last_name', 'city', 'state')))->first();
+            $winnerName = $lastWinner['first_name'].' '.substr($lastWinner['last_name'],0,1).'. '.$lastWinner['city'].', '.$lastWinner['state'];
         } 
         elseif ($campaignCode == 'EDW_LAST_CHANCE') 
         {

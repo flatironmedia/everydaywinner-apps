@@ -6,14 +6,13 @@ use Cake\ORM\Table;
 
 class DefaultConfigsTable extends Table
 {
-    public $actsAs = array('FlatIronDataBase');
     var $primaryKey = 'name';
         
     public function getDefaultConfig($name){
         $query = $this->find('list', array(
-            'fields' => 'DefaultConfig.value',
+            'fields' => 'DefaultConfigs.value',
             'conditions' => array(
-                'DefaultConfig.name' => $name
+                'DefaultConfigs.name' => $name
             )
         ));
 
@@ -23,7 +22,7 @@ class DefaultConfigsTable extends Table
     }
 
     public function saveDefaultConfig($key, $value){
-        $currentConfig =  trim($this->getDefaultConfig($key));
+        $currentConfig = trim($this->getDefaultConfig($key));
         if(!is_null($currentConfig)){
             $this->id = $key;
         }

@@ -289,9 +289,9 @@ class EDWWinnerJsonExportCommand extends Command
 
         $result = $Winners->find()->contain(['standings'])->where([
             'Standings.status_id !='=>6,
-            'Standings.date_won <='=>date("Y-m-d",strtotime('today -1 day')),
+            'Standings.date_won >='=>date("Y-m-d",strtotime('today -1 day')),
             'Standings.site_id' => 1
-        ])->first();
+        ])->order(['Winners.id' => 'DESC'])->first();
 
         if (empty($result))
         {
@@ -356,7 +356,7 @@ class EDWWinnerJsonExportCommand extends Command
             <variables>
                 <variable>
                     <key>yesterday_winner_name</key>
-                    <value>".ucwords($this->yesterdaywinnerforxml['first_name'])." ".ucwords($this->yesterdaywinnerforxml['last_name'])."."."</value>
+                    <value>".ucwords($this->yesterdaywinnerforxml['first_name'])." ".ucwords($this->yesterdaywinnerforxml['last_name'][0])."."."</value>
                 </variable>
                 <variable>
                     <key>yesterday_winner_city</key>
@@ -370,12 +370,16 @@ class EDWWinnerJsonExportCommand extends Command
     private function winnerxmlunclamiedprizessection($numberOfWinners)
     {
         $Winners = TableRegistry::getTableLocator()->get("winners");
-        $result = $Winners->find()->contain(['standings'])->where([
+        $result = $Winners->find()->contain(['Standings'])->where([
             'Standings.status_id' => 2,
             'Standings.date_won >' => date('Y-m-d H:i:s', strtotime("11/1/2016" )),
             'Standings.date_won <' => date("Y-m-d", strtotime('today -1 day')),
             'Standings.site_id' => 1
-        ])->order(['rand()'])->limit($numberOfWinners)->all();
+        ])->order(
+            ['rand()']
+        )->limit(
+            $numberOfWinners
+        )->all();
 
         $listOfWinners = [];
         foreach($result as $item){$listOfWinners[] = $item;}
@@ -430,13 +434,11 @@ class EDWWinnerJsonExportCommand extends Command
         }
 
         $winner = [
-            'Winners' => [
-                'first_name' => ucwords(strtolower($result->results[0]->name->first)),
-                'last_name'=>ucwords(strtolower($result->results[0]->name->last)),
-                'city'=>ucwords(strtolower($result->results[0]->location->city)),
-                'state'=>$state,
-            ],
-            'Standings'=>[
+            'first_name' => ucwords(strtolower($result->results[0]->name->first)),
+            'last_name'=>ucwords(strtolower($result->results[0]->name->last)),
+            'city'=>ucwords(strtolower($result->results[0]->location->city)),
+            'state'=>$state,
+            'standing'=>[
                 'date_won'=> date("Y-m-d",strtotime('today -1 day')),
             ]
         ];
@@ -457,7 +459,7 @@ class EDWWinnerJsonExportCommand extends Command
     private function getformattedYesterdayWinnerJson($dataArray, $returnPlain = false)
     {
         $title=ucwords(strtolower($dataArray['first_name'])).' '.strtoupper($dataArray['last_name']).'. from '.ucwords(strtolower($dataArray['city'])).', '.$dataArray['state'];
-        $pubupdate = date("F j, Y",strtotime($dataArray['Standings']['date_won']));
+        $pubupdate = date("F j, Y",strtotime($dataArray['standing']['date_won']));
         $returnArray = [['title' => $title, 'pubdate' => $pubupdate]];
         if ($returnPlain) {
             return $title;
